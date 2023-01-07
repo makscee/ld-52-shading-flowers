@@ -7,6 +7,7 @@ pub use shader::*;
 
 pub struct View {
     pub camera: Camera2d,
+    pub framebuffer_size: Vec2<usize>,
     geng: Geng,
     assets: Rc<Assets>,
 }
@@ -22,6 +23,7 @@ impl View {
             camera,
             geng,
             assets,
+            framebuffer_size: Vec2::ZERO,
         }
     }
 
@@ -43,7 +45,6 @@ impl View {
             ugli::VertexBuffer::new_dynamic(self.geng.ugli(), Vec::new());
         instances_arr.resize(shader.instances, Instance {});
         let quad = shader.get_vertices(&self.geng);
-        let framebuffer_size = framebuffer.size();
 
         let program = shader.program.as_ref().expect("Shader program not loaded");
         ugli::draw(
@@ -56,7 +57,7 @@ impl View {
                     u_time: 0.0,
                     u_position: position
                 },
-                geng::camera2d_uniforms(&self.camera, framebuffer_size.map(|x| x as f32)),
+                geng::camera2d_uniforms(&self.camera, self.framebuffer_size.map(|x| x as f32)),
                 &shader.parameters,
                 uniforms,
             ),

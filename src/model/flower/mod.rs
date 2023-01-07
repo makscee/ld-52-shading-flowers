@@ -28,4 +28,12 @@ impl Flower {
             stats,
         }
     }
+
+    pub fn is_clicked(&self, mouse_pos: Vec2<f32>) -> bool {
+        (self.position - mouse_pos).len() < self.stats.size
+    }
+
+    pub fn handle_click(&self) {
+        debug! {"click {}", self.id};
+    }
 }
