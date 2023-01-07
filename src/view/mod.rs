@@ -23,7 +23,7 @@ impl View {
             camera,
             geng,
             assets,
-            framebuffer_size: Vec2::ZERO,
+            framebuffer_size: vec2(100, 100),
         }
     }
 

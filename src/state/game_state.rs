@@ -5,6 +5,13 @@ use geng::{prelude::itertools::Itertools, ui::*};
 impl State for Game {
     fn update(&mut self, delta_time: f64) {
         self.logic.model.game_time += delta_time;
+        self.logic.model.mouse_pos = self.view.camera.screen_to_world(
+            self.view.framebuffer_size.map(|x| x as f32),
+            self.geng.window().cursor_position().map(|x| x as f32),
+        );
+        debug!("Mouse pos: {}", self.logic.model.mouse_pos);
+        
+        self.logic.update(delta_time as f32);
         for flower in self.logic.model.flowers.iter_mut() {
             flower.stats.update(delta_time);
         }
@@ -14,11 +21,7 @@ impl State for Game {
     fn handle_event(&mut self, event: geng::Event) {
         match event {
             Event::MouseDown { position, button } => {
-                let position = position.map(|x| x as f32);
-                let position = self
-                    .view
-                    .camera
-                    .screen_to_world(self.view.framebuffer_size.map(|x| x as f32), position);
+                let position = self.logic.model.mouse_pos;
                 for flower in self.logic.model.flowers.iter() {
                     if flower.is_mouse_over_size(position.map(|x| x as f32)) {
                         flower.handle_click(&mut self.logic.model.harvest);
