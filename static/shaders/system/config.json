@@ -4,5 +4,11 @@
         "parameters": {},
         "vertices": 2,
         "instances": 1
+    },
+    "flower": {
+        "path": "flower.glsl",
+        "parameters": {},
+        "vertices": 2,
+        "instances": 1
     }
 }

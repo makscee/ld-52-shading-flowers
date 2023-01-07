@@ -1,20 +1,7 @@
 use super::*;
 
-mod ability;
-mod clan;
-mod round;
-mod unit_template;
-
-pub use ability::*;
-pub use clan::*;
-pub use round::*;
-pub use unit_template::*;
-
 #[derive(geng::Assets)]
 pub struct Assets {
-    // pub units: Vec<UnitTemplate>,
-    // pub clans: Vec<Clan>,
-    // pub rounds: Vec<Round>,
     #[asset(load_with = "load_system_shaders(geng, &base_path)")]
     pub system_shaders: SystemShaders,
 }
@@ -35,6 +22,12 @@ async fn load_system_shaders(
         .await
         .context(format!("Failed to load {path}"))?;
     system_shaders.field.program = Some(Rc::new(program));
+
+    let path = system_shaders.flower.path.clone();
+    let program = <ugli::Program as geng::LoadAsset>::load(&geng, &base_path.join(path.clone()))
+        .await
+        .context(format!("Failed to load {path}"))?;
+    system_shaders.flower.program = Some(Rc::new(program));
 
     Ok::<_, anyhow::Error>(system_shaders)
 }

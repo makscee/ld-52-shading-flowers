@@ -40,30 +40,30 @@ fn main() {
     geng::setup_panic_handler();
     let geng = setup_geng();
 
-    let logic = Logic {};
+    let mut logic = Logic::new();
     let assets = Rc::new(
         futures::executor::block_on(<Assets as geng::LoadAsset>::load(&geng, &static_path()))
             .unwrap(),
     );
 
-    let view = View::new(geng.clone(), assets.clone());
-    let model = Model {};
+    let model = Rc::new(Model::new(&mut logic));
+    let logic = Rc::new(logic);
+    let view = Rc::new(View::new(geng.clone(), assets.clone(), model.clone()));
 
     let state = StateManager::new();
     let mut game = Game {
         geng: geng.clone(),
-        logic,
+        logic: logic.clone(),
         assets: assets.clone(),
-        view,
+        view: view.clone(),
         state,
-        model,
+        model: model.clone(),
     };
-    game.state.push(Box::new(MainMenuState {
-        model: Rc::new(game.model),
-        view: Rc::new(game.view),
-        logic: Rc::new(game.logic),
+    game.state.push(Box::new(GameState {
+        model: model.clone(),
+        view: view.clone(),
+        logic: logic.clone(),
         assets: game.assets,
-        transition: false,
     }));
     geng::run(&geng, game.state);
 }

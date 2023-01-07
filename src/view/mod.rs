@@ -1,58 +1,53 @@
 use super::*;
 
-mod effect;
-mod node;
-mod queue;
 mod shader;
 
-pub use effect::*;
 pub use geng::Camera2d;
-pub use node::*;
-pub use queue::*;
 pub use shader::*;
 
 pub struct View {
-    pub queue: VisualQueue,
     pub camera: Camera2d,
     geng: Geng,
     assets: Rc<Assets>,
+    model: Rc<Model>,
 }
 
 impl View {
-    pub fn new(geng: Geng, assets: Rc<Assets>) -> Self {
-        let queue = VisualQueue {
-            nodes: VecDeque::new(),
-            persistent_nodes: vec![],
-        };
+    pub fn new(geng: Geng, assets: Rc<Assets>, model: Rc<Model>) -> Self {
         let camera = geng::Camera2d {
             center: vec2(0.0, 0.0),
             rotation: 0.0,
             fov: 5.0,
         };
         Self {
-            queue,
             camera,
             geng,
             assets,
+            model,
         }
     }
 
     pub fn draw(&self, framebuffer: &mut ugli::Framebuffer) {
         self.draw_field(framebuffer);
+        self.draw_flowers(framebuffer);
     }
 
-    fn draw_field(&self, framebuffer: &mut ugli::Framebuffer) {
-        let shader_program = &self.assets.system_shaders.field;
+    fn draw_shader<U>(
+        &self,
+        framebuffer: &mut ugli::Framebuffer,
+        position: Vec2<f32>,
+        shader: &ShaderProgram,
+        uniforms: U,
+    ) where
+        U: Uniforms,
+    {
         let mut instances_arr: ugli::VertexBuffer<Instance> =
             ugli::VertexBuffer::new_dynamic(self.geng.ugli(), Vec::new());
-        instances_arr.resize(shader_program.instances, Instance {});
-        let quad = shader_program.get_vertices(&self.geng);
+        instances_arr.resize(shader.instances, Instance {});
+        let quad = shader.get_vertices(&self.geng);
         let framebuffer_size = framebuffer.size();
 
-        let program = shader_program
-            .program
-            .as_ref()
-            .expect("Shader program not loaded");
+        let program = shader.program.as_ref().expect("Shader program not loaded");
         ugli::draw(
             framebuffer,
             &program,
@@ -61,14 +56,39 @@ impl View {
             (
                 ugli::uniforms! {
                     u_time: 0.0,
+                    u_position: position
                 },
                 geng::camera2d_uniforms(&self.camera, framebuffer_size.map(|x| x as f32)),
-                &shader_program.parameters,
+                &shader.parameters,
+                uniforms,
             ),
             ugli::DrawParameters {
                 blend_mode: Some(ugli::BlendMode::default()),
                 ..default()
             },
         );
+    }
+
+    fn draw_field(&self, framebuffer: &mut ugli::Framebuffer) {
+        self.draw_shader(
+            framebuffer,
+            Vec2::ZERO,
+            &self.assets.system_shaders.field,
+            uniforms!(),
+        )
+    }
+
+    fn draw_flowers(&self, framebuffer: &mut ugli::Framebuffer) {
+        for flower in self.model.flowers.iter() {
+            self.draw_shader(
+                framebuffer,
+                flower.position,
+                &self.assets.system_shaders.flower,
+                uniforms!(
+                    u_size: flower.stats.size,
+                    u_radius: flower.stats.radius,
+                ),
+            );
+        }
     }
 }
