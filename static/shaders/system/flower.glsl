@@ -27,7 +27,7 @@ void main() {
     if(length(v_quad_pos) > 1.0) {
         discard;
     }
-    vec3 color = hueShift(vec3(1., 0., 0.), u_hue * PI * 2);
+    vec3 color = hue(u_hue);
     gl_FragColor = vec4(color, 1.);
 }
 #endif

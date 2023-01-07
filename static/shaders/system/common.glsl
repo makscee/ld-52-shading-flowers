@@ -23,3 +23,14 @@ vec3 hueShift(vec3 color, float hueAdjust) // hue in radians
 
     return vec3(dot(yIQ, kYIQToR), dot(yIQ, kYIQToG), dot(yIQ, kYIQToB));
 }
+
+vec3 hue(float value) {
+    return hueShift(vec3(1, 0, 0), value * PI * 2.);
+}
+
+float vecAngle(vec2 v) {
+    if(v == vec2(0.))
+        return 0.;
+    float r = acos(dot(normalize(v), vec2(0., 1.)));
+    return (r + float(v.x > 0.) * (PI - r) * 2.);
+}

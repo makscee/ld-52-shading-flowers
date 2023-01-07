@@ -16,7 +16,7 @@ impl View {
         let camera = geng::Camera2d {
             center: vec2(0.0, 0.0),
             rotation: 0.0,
-            fov: 5.0,
+            fov: 15.0,
         };
         Self {
             camera,
@@ -81,6 +81,7 @@ impl View {
             let uniforms = uniforms!(
                 u_radius: flower.stats.radius * flower.stats.growth,
                 u_hue: flower.stats.hue,
+                u_time: model.game_time,
             );
             self.draw_shader(
                 framebuffer,
@@ -93,6 +94,7 @@ impl View {
             let uniforms = uniforms!(
                 u_size: flower.stats.size * flower.stats.growth,
                 u_hue: flower.stats.hue,
+                u_time: model.game_time,
             );
             self.draw_shader(
                 framebuffer,

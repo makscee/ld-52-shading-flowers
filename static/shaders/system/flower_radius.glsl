@@ -1,6 +1,7 @@
 #include <common.glsl>
 
 uniform float u_radius;
+uniform float u_time;
 
 #ifdef VERTEX_SHADER
 uniform float u_padding = 0.0;
@@ -27,10 +28,17 @@ uniform float u_hue;
 
 void main() {
     float len = length(v_quad_pos);
-    if(len > 1.0 || len < 1.0 - THICKNESS / u_radius) {
+    if(len > 1.0) {
         discard;
     }
-    vec3 color = hueShift(vec3(1., 0., 0.), u_hue * PI * 2);
-    gl_FragColor = vec4(color, 1.);
+    vec4 color = vec4(hue(u_hue), 1);
+    if(len < 1.0 - THICKNESS / u_radius) {
+        color.a = 0.15;
+    } else {
+        if(fract((vecAngle(v_quad_pos) + PI * 2 + u_time * .2) / PI * 8) < 0.5) {
+            discard;
+        }
+    }
+    gl_FragColor = color;
 }
 #endif
