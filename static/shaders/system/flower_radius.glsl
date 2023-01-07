@@ -31,9 +31,9 @@ void main() {
     if(len > 1.0) {
         discard;
     }
-    vec4 color = vec4(hue(u_hue), 1);
+    vec4 color = vec4(hue(u_hue), 0.6);
     if(len < 1.0 - THICKNESS / u_radius) {
-        color.a = 0.15;
+        color.a = 0.1;
     } else {
         if(fract((vecAngle(v_quad_pos) + PI * 2 + u_time * .2) / PI * 8) < 0.5) {
             discard;

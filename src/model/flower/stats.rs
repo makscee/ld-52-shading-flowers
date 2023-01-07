@@ -1,5 +1,6 @@
 use super::*;
 
+#[derive(Clone)]
 pub struct FlowerStats {
     pub time_alive: Time,
     pub growth: f32,
@@ -28,6 +29,21 @@ impl FlowerStats {
             radius: global_rng().gen_range(1.5..=2.5),
             hue: global_rng().gen_range(0.0..=1.0),
         }
+    }
+
+    pub fn new_offspring(parents: Vec<FlowerStats>) -> Self {
+        let mut stats = FlowerStats::new(0.0, 0.0, 0.0);
+
+        let sum: f32 = parents.iter().map(|f| f.radius).sum();
+        stats.radius = sum / parents.len() as f32;
+
+        let sum: f32 = parents.iter().map(|f| f.hue).sum();
+        stats.hue = sum / parents.len() as f32;
+
+        let sum: f32 = parents.iter().map(|f| f.size).sum();
+        stats.size = sum / parents.len() as f32;
+
+        stats
     }
 
     pub fn update(&mut self, delta_time: Time) {

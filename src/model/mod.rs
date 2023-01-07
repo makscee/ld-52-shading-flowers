@@ -7,6 +7,7 @@ pub use flower::*;
 pub struct Model {
     pub game_time: Time,
     pub flowers: Collection<Flower>,
+    pub harvest: i32,
 }
 
 impl Model {
@@ -15,6 +16,7 @@ impl Model {
         Self {
             flowers,
             game_time: 0.0,
+            harvest: 0,
         }
     }
 }

@@ -28,12 +28,27 @@ impl Flower {
             stats,
         }
     }
+    pub fn new_stats(id: Id, position: Vec2<f32>, stats: FlowerStats) -> Self {
+        Self {
+            id,
+            position,
+            stats,
+        }
+    }
+    pub fn new_offspring(id: Id, position: Vec2<f32>, parents: Vec<FlowerStats>) -> Self {
+        Self::new_stats(id, position, FlowerStats::new_offspring(parents))
+    }
 
-    pub fn is_clicked(&self, mouse_pos: Vec2<f32>) -> bool {
+    pub fn is_mouse_over_size(&self, mouse_pos: Vec2<f32>) -> bool {
         (self.position - mouse_pos).len() < self.stats.size
     }
 
-    pub fn handle_click(&self) {
+    pub fn is_mouse_over_radius(&self, mouse_pos: Vec2<f32>) -> bool {
+        (self.position - mouse_pos).len() < self.stats.radius
+    }
+
+    pub fn handle_click(&self, harvest: &mut i32) {
         debug! {"click {}", self.id};
+        *harvest += 1;
     }
 }
