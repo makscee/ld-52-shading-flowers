@@ -19,7 +19,7 @@ use view::*;
 type Id = i64;
 type Name = String;
 type Description = String;
-type Time = f32;
+type Time = f64;
 
 fn setup_geng() -> Geng {
     geng::setup_panic_handler();
@@ -46,24 +46,14 @@ fn main() {
             .unwrap(),
     );
 
-    let model = Rc::new(Model::new(&mut logic));
-    let logic = Rc::new(logic);
-    let view = Rc::new(View::new(geng.clone(), assets.clone(), model.clone()));
+    let view = View::new(geng.clone(), assets.clone());
 
-    let state = StateManager::new();
-    let mut game = Game {
+    logic.init();
+    let game = Game {
         geng: geng.clone(),
-        logic: logic.clone(),
+        logic,
+        view,
         assets: assets.clone(),
-        view: view.clone(),
-        state,
-        model: model.clone(),
     };
-    game.state.push(Box::new(GameState {
-        model: model.clone(),
-        view: view.clone(),
-        logic: logic.clone(),
-        assets: game.assets,
-    }));
-    geng::run(&geng, game.state);
+    geng::run(&geng, game);
 }

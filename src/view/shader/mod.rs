@@ -10,4 +10,5 @@ pub use program::*;
 pub struct SystemShaders {
     pub field: ShaderProgram,
     pub flower: ShaderProgram,
+    pub flower_radius: ShaderProgram,
 }

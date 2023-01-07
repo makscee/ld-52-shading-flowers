@@ -9,11 +9,10 @@ pub struct View {
     pub camera: Camera2d,
     geng: Geng,
     assets: Rc<Assets>,
-    model: Rc<Model>,
 }
 
 impl View {
-    pub fn new(geng: Geng, assets: Rc<Assets>, model: Rc<Model>) -> Self {
+    pub fn new(geng: Geng, assets: Rc<Assets>) -> Self {
         let camera = geng::Camera2d {
             center: vec2(0.0, 0.0),
             rotation: 0.0,
@@ -23,13 +22,12 @@ impl View {
             camera,
             geng,
             assets,
-            model,
         }
     }
 
-    pub fn draw(&self, framebuffer: &mut ugli::Framebuffer) {
-        self.draw_field(framebuffer);
-        self.draw_flowers(framebuffer);
+    pub fn draw(&self, framebuffer: &mut ugli::Framebuffer, model: &Model) {
+        self.draw_field(framebuffer, model);
+        self.draw_flowers(framebuffer, model);
     }
 
     fn draw_shader<U>(
@@ -69,7 +67,7 @@ impl View {
         );
     }
 
-    fn draw_field(&self, framebuffer: &mut ugli::Framebuffer) {
+    fn draw_field(&self, framebuffer: &mut ugli::Framebuffer, model: &Model) {
         self.draw_shader(
             framebuffer,
             Vec2::ZERO,
@@ -78,16 +76,29 @@ impl View {
         )
     }
 
-    fn draw_flowers(&self, framebuffer: &mut ugli::Framebuffer) {
-        for flower in self.model.flowers.iter() {
+    fn draw_flowers(&self, framebuffer: &mut ugli::Framebuffer, model: &Model) {
+        for flower in model.flowers.iter() {
+            let uniforms = uniforms!(
+                u_radius: flower.stats.radius * flower.stats.growth,
+                u_hue: flower.stats.hue,
+            );
+            self.draw_shader(
+                framebuffer,
+                flower.position,
+                &self.assets.system_shaders.flower_radius,
+                uniforms,
+            );
+        }
+        for flower in model.flowers.iter() {
+            let uniforms = uniforms!(
+                u_size: flower.stats.size * flower.stats.growth,
+                u_hue: flower.stats.hue,
+            );
             self.draw_shader(
                 framebuffer,
                 flower.position,
                 &self.assets.system_shaders.flower,
-                uniforms!(
-                    u_size: flower.stats.size,
-                    u_radius: flower.stats.radius,
-                ),
+                uniforms,
             );
         }
     }

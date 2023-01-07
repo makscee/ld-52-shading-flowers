@@ -11,6 +11,14 @@ async fn load_system_shaders(
     base_path: &std::path::Path,
 ) -> anyhow::Result<SystemShaders> {
     let base_path = base_path.join("shaders/system/");
+
+    geng.shader_lib().add(
+        "common.glsl",
+        &<String as geng::LoadAsset>::load(&geng, &base_path.join("common.glsl"))
+            .await
+            .context(format!("Failed to load common.glsl"))?,
+    );
+
     let json = <String as geng::LoadAsset>::load(geng, &base_path.join("config.json"))
         .await
         .context("Failed to load config.json for system shaders")?;
@@ -28,6 +36,12 @@ async fn load_system_shaders(
         .await
         .context(format!("Failed to load {path}"))?;
     system_shaders.flower.program = Some(Rc::new(program));
+
+    let path = system_shaders.flower_radius.path.clone();
+    let program = <ugli::Program as geng::LoadAsset>::load(&geng, &base_path.join(path.clone()))
+        .await
+        .context(format!("Failed to load {path}"))?;
+    system_shaders.flower_radius.program = Some(Rc::new(program));
 
     Ok::<_, anyhow::Error>(system_shaders)
 }

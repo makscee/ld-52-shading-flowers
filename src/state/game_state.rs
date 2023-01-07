@@ -1,14 +1,11 @@
 use super::*;
 
-pub struct GameState {
-    pub model: Rc<Model>,
-    pub view: Rc<View>,
-    pub logic: Rc<Logic>,
-    pub assets: Rc<Assets>,
-}
-
-impl State for GameState {
-    fn update(&mut self, delta_time: f64) {}
+impl State for Game {
+    fn update(&mut self, delta_time: f64) {
+        for flower in self.logic.model.flowers.iter_mut() {
+            flower.stats.update(delta_time);
+        }
+    }
     fn fixed_update(&mut self, delta_time: f64) {}
 
     fn handle_event(&mut self, event: geng::Event) {}
@@ -19,6 +16,6 @@ impl State for GameState {
 
     fn draw(&mut self, framebuffer: &mut ugli::Framebuffer) {
         clear(framebuffer, Some(Rgba::BLUE), None, None);
-        self.view.draw(framebuffer);
+        self.view.draw(framebuffer, &self.logic.model);
     }
 }

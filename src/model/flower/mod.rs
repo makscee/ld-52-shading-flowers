@@ -1,5 +1,3 @@
-use std::os::macos::raw::stat;
-
 use super::*;
 
 mod stats;
@@ -14,9 +12,16 @@ pub struct Flower {
 }
 
 impl Flower {
-    pub fn new(logic: &mut Logic, position: Vec2<f32>) -> Self {
-        let id = logic.get_next_id();
-        let stats = FlowerStats::new(1.0, 3.0);
+    pub fn new(id: Id, position: Vec2<f32>) -> Self {
+        let stats = FlowerStats::new(1.0, 2.0, 0.0);
+        Self {
+            id,
+            position,
+            stats,
+        }
+    }
+    pub fn new_random(id: Id, position: Vec2<f32>) -> Self {
+        let stats = FlowerStats::new_random();
         Self {
             id,
             position,

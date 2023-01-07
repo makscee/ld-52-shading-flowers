@@ -10,5 +10,11 @@
         "parameters": {},
         "vertices": 2,
         "instances": 1
+    },
+    "flower_radius": {
+        "path": "flower_radius.glsl",
+        "parameters": {},
+        "vertices": 2,
+        "instances": 1
     }
 }

@@ -25,7 +25,7 @@ impl FlowerStats {
             time_alive: 0.0,
             growth: 0.0,
             size: global_rng().gen_range(0.5..=1.0),
-            radius: global_rng().gen_range(0.5..=1.0),
+            radius: global_rng().gen_range(1.1..=2.0),
             hue: global_rng().gen_range(0.0..=1.0),
         }
     }

@@ -1,4 +1,4 @@
-#version 410
+#version 330
 #define varying out
 #define attribute in
 #define gl_FragColor FragColor
