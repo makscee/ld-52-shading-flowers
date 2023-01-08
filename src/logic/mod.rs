@@ -24,7 +24,6 @@ impl Logic {
     fn init_flowers(&mut self) {
         let id = self.get_next_id();
         let mut flower = Flower::new_random(id, Vec2::ZERO);
-        flower.add_bind(&0, Vec2::ZERO);
         self.model.flowers.insert(flower);
     }
 
@@ -36,8 +35,9 @@ impl Logic {
     pub fn update(&mut self, delta_time: f32) {
         let ids = self.model.flowers.ids().copied().collect_vec();
         for id in ids {
-            let mut flower = self.model.flowers.remove(&id).expect("Unit not found");
+            let mut flower = self.model.flowers.get(&id).expect("Unit not found").clone();
             flower.update_binds(delta_time, &self.model);
+            self.model.flowers.remove(&flower.id);
             self.model.flowers.insert(flower);
         }
     }

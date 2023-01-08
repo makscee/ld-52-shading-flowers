@@ -9,8 +9,7 @@ impl State for Game {
             self.view.framebuffer_size.map(|x| x as f32),
             self.geng.window().cursor_position().map(|x| x as f32),
         );
-        debug!("Mouse pos: {}", self.logic.model.mouse_pos);
-        
+
         self.logic.update(delta_time as f32);
         for flower in self.logic.model.flowers.iter_mut() {
             flower.stats.update(delta_time);
@@ -20,13 +19,27 @@ impl State for Game {
 
     fn handle_event(&mut self, event: geng::Event) {
         match event {
-            Event::MouseDown { position, button } => {
+            Event::MouseDown {
+                position: _,
+                button,
+            } => {
                 let position = self.logic.model.mouse_pos;
-                for flower in self.logic.model.flowers.iter() {
+                let mut hovered_flower = None;
+                let next_id = self.logic.get_next_id();
+                for flower in self.logic.model.flowers.iter_mut() {
                     if flower.is_mouse_over_size(position.map(|x| x as f32)) {
-                        flower.handle_click(&mut self.logic.model.harvest);
-                        return;
+                        hovered_flower = Some(flower);
                     }
+                }
+                if let Some(flower) = hovered_flower {
+                    if button == MouseButton::Left {
+                        flower.start_drag();
+                    } else {
+                        let node = flower.grow(&next_id);
+                        debug!("new id#{}", node.id);
+                        self.logic.model.flowers.insert(*node);
+                    }
+                    return;
                 }
                 let intersections = self
                     .logic
@@ -50,6 +63,17 @@ impl State for Game {
                         .insert(Flower::new_random(id, position));
                 }
             }
+            Event::MouseUp {
+                position: _,
+                button,
+            } => {
+                if button == MouseButton::Left {
+                    for flower in self.logic.model.flowers.iter_mut() {
+                        flower.end_drag();
+                    }
+                }
+            }
+
             _ => {}
         }
     }

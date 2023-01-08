@@ -34,10 +34,6 @@ impl Bind {
         let b_pos = Self::get_position_by_id(self.b, model);
         let a_need_pos = b_pos - self.offset;
         let a_vel = (a_need_pos - a_pos) * self.tension * delta_time;
-        debug!(
-            "a_pos: {} b_pos: {} a_need_pos: {} a_vel: {}",
-            a_pos, b_pos, a_need_pos, a_vel
-        );
         a_vel
     }
 }

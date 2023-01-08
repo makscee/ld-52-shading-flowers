@@ -2,6 +2,7 @@ use super::*;
 
 mod shader;
 
+use geng::prelude::itertools::Itertools;
 pub use geng::Camera2d;
 pub use shader::*;
 
@@ -78,6 +79,10 @@ impl View {
     }
 
     fn draw_flowers(&self, framebuffer: &mut ugli::Framebuffer, model: &Model) {
+        // let mut flowers = Vec::new();
+        // for node in model.flowers.iter() {
+        //     flowers.extend(node.get_all_nodes());
+        // }
         for flower in model.flowers.iter() {
             let uniforms = uniforms!(
                 u_radius: flower.stats.radius * flower.stats.growth,

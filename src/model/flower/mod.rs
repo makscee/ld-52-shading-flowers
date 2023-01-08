@@ -37,18 +37,34 @@ impl Flower {
         Self::new_stats(id, position, FlowerStats::new_offspring(parents))
     }
 
-    pub fn grow(&mut self) {
+    pub fn get_all_nodes(&self) -> Vec<&Flower> {
+        let mut result = vec![self];
+        let mut head = &self.head;
+        while let Some(node) = head {
+            result.push(&node);
+            head = &node.head;
+        }
+        result
+    }
+
+    pub fn grow(&mut self, next_id: &Id) -> Box<Flower> {
         if let Some(head) = &mut self.head {
-            head.grow();
+            let head = head.grow(next_id);
+            head
         } else {
-            self.head = Some(Box::new(self.new_grown_head()));
+            let mut head = self.new_grown_head(next_id);
+            head.add_bind(&self.id, vec2(0.0, -2.0));
+            let head = Box::new(head);
+            self.head = Some(head.clone());
+            head
         }
     }
 
-    fn new_grown_head(&self) -> Flower {
+    fn new_grown_head(&self, next_id: &Id) -> Flower {
         let mut new_head = self.clone();
-        new_head.stats.radius *= 0.5;
-        new_head.stats.size *= 0.5;
+        new_head.id = *next_id;
+        new_head.stats.radius *= 0.7;
+        new_head.stats.size *= 0.7;
         new_head
     }
 
@@ -65,6 +81,21 @@ impl Flower {
     }
 
     pub fn update_binds(&mut self, delta_time: f32, model: &Model) {
+        // let mut node = self;
+        // let mut head = &node.head;
+        // while let Some(node) = &mut head {
+        //     node.do_update_binds(delta_time, model);
+        //     head = &node.head;
+        // }
+        let mut node = self;
+        node.do_update_binds(delta_time, model);
+        while let Some(head) = &mut node.head {
+            head.do_update_binds(delta_time, model);
+            node = head;
+        }
+    }
+
+    fn do_update_binds(&mut self, delta_time: f32, model: &Model) {
         for bind in self.binds.values() {
             self.position += bind.get_delta_pos(delta_time, model);
         }
