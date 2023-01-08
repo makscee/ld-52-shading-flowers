@@ -24,14 +24,13 @@ void main() {
 const float THICKNESS = 0.05;
 
 in vec2 v_quad_pos;
-uniform float u_hue;
 
 void main() {
     float len = length(v_quad_pos);
     if(len > 1.0) {
         discard;
     }
-    vec4 color = vec4(hue(u_hue), 0.6);
+    vec4 color = vec4(hueShift(u_color.rgb, u_hue_shift), 1.0);
     if(len < 1.0 - THICKNESS / u_radius) {
         color.a = 0.1;
     } else {

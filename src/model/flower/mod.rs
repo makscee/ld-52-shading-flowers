@@ -114,7 +114,7 @@ impl Flower {
             b: id,
             offset: Vec2::ZERO,
             tension: 10.0,
-            toughness: 2.0,
+            toughness: 3.0,
         };
         self.bind_by_bind(bind.clone());
         bind

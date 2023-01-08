@@ -16,5 +16,11 @@
         "parameters": {},
         "vertices": 2,
         "instances": 1
+    },
+    "bind": {
+        "path": "bind.glsl",
+        "parameters": {},
+        "vertices": 4,
+        "instances": 1
     }
 }

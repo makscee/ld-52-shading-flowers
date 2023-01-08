@@ -31,6 +31,7 @@ impl View {
     pub fn draw(&self, framebuffer: &mut ugli::Framebuffer, model: &Model) {
         self.draw_field(framebuffer, model);
         self.draw_flowers(framebuffer, model);
+        self.draw_binds(framebuffer, model);
     }
 
     fn draw_shader<U>(
@@ -86,7 +87,7 @@ impl View {
         for flower in model.flowers.iter() {
             let uniforms = uniforms!(
                 u_radius: flower.stats.radius * flower.stats.growth,
-                u_hue: flower.stats.hue,
+                u_color: flower.stats.color,
                 u_time: model.game_time,
             );
             self.draw_shader(
@@ -99,7 +100,7 @@ impl View {
         for flower in model.flowers.iter() {
             let uniforms = uniforms!(
                 u_size: flower.stats.size * flower.stats.growth,
-                u_hue: flower.stats.hue,
+                u_color: flower.stats.color,
                 u_time: model.game_time,
             );
             self.draw_shader(
@@ -108,6 +109,28 @@ impl View {
                 &self.assets.system_shaders.flower,
                 uniforms,
             );
+        }
+    }
+
+    fn draw_binds(&self, framebuffer: &mut ugli::Framebuffer, model: &Model) {
+        for flower in model.flowers.iter() {
+            for bind in flower.binds.values() {
+                if bind.b == 0 {
+                    continue;
+                }
+                let uniforms = uniforms!(
+                    u_color: flower.stats.color,
+                    u_time: model.game_time,
+                    u_position_2: Bind::get_position_by_id(bind.b, model),
+                    u_toughness: bind.toughness,
+                );
+                self.draw_shader(
+                    framebuffer,
+                    bind.a,
+                    &self.assets.system_shaders.bind,
+                    uniforms,
+                );
+            }
         }
     }
 }

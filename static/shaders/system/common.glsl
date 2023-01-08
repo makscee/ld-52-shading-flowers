@@ -1,3 +1,6 @@
+uniform vec4 u_color;
+uniform float u_hue_shift;
+
 vec3 hueShift(vec3 color, float hueAdjust) // hue in radians
 {
     const vec3 kRGBToYPrime = vec3(0.299, 0.587, 0.114);
@@ -33,4 +36,9 @@ float vecAngle(vec2 v) {
         return 0.;
     float r = acos(dot(normalize(v), vec2(0., 1.)));
     return (r + float(v.x > 0.) * (PI - r) * 2.);
+}
+
+vec2 rotateCW(vec2 p, float a) {
+    mat2 m = mat2(cos(a), -sin(a), sin(a), cos(a));
+    return p * m;
 }

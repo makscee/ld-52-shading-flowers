@@ -6,7 +6,7 @@ pub struct Bind {
     pub b: Id,
     pub offset: Vec2<f32>,
     pub tension: f32,
-    pub toughness: f32, // multiplies of length before break
+    pub toughness: f32, // max length before break
 }
 
 impl Bind {
