@@ -42,7 +42,7 @@ impl State for Game {
                             .expect("Flower not found")
                             .start_drag();
                     } else {
-                        let nodes = flower.get_all_nodes(&self.logic.model.flowers);
+                        let nodes = flower.get_head_nodes(&self.logic.model.flowers);
                         debug!("nodes collected: {}", nodes.len());
                         for id in nodes {
                             let node = self
@@ -57,6 +57,13 @@ impl State for Game {
                             }
                             node.pop();
                         }
+                        self.logic
+                            .model
+                            .flowers
+                            .get_mut(&flower.id)
+                            .expect("Flower not found")
+                            .stats
+                            .growth = 0.3;
                     }
                     return;
                 }
@@ -95,7 +102,7 @@ impl State for Game {
                     let id = -self.logic.get_next_id();
                     for flower in self.logic.model.flowers.iter_mut() {
                         flower.end_drag();
-                        if !flower.has_ground_bind() {
+                        if !flower.has_ground_bind() && flower.tail.is_none() {
                             let bind = flower.add_ground_bind(id);
                             self.logic.model.fixed_pos.insert(bind.b, bind.a);
                         }
@@ -115,18 +122,5 @@ impl State for Game {
         clear(framebuffer, Some(Rgba::BLUE), None, None);
         self.view.framebuffer_size = framebuffer.size();
         self.view.draw(framebuffer, &self.logic.model);
-    }
-
-    fn ui<'a>(&'a mut self, cx: &'a ui::Controller) -> Box<dyn ui::Widget + 'a> {
-        let text = self.logic.model.harvest.to_string();
-        (
-            ColorBox::new(Rgba::try_from("#21a91f").unwrap()).fixed_size(vec2(90.0, 90.0)),
-            Text::new(text, cx.geng().default_font(), 32.0, Rgba::WHITE)
-                .center()
-                .fixed_size(vec2(35.0, 35.0)),
-        )
-            .stack()
-            .align(vec2(0.05, 0.05))
-            .boxed()
     }
 }

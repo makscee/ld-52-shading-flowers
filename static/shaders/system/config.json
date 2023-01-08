@@ -28,5 +28,13 @@
         "parameters": {},
         "vertices": 2,
         "instances": 1
+    },
+    "flower_particles": {
+        "path": "flower_particles.glsl",
+        "parameters": {
+            "u_size": 0.03
+        },
+        "vertices": 2,
+        "instances": 1000
     }
 }

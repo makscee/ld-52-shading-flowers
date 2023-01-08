@@ -23,9 +23,10 @@ void main() {
 in vec2 v_quad_pos;
 
 void main() {
-    if(length(v_quad_pos) > 1.0) {
+    float len = length(v_quad_pos);
+    if(len > 1.0) {
         discard;
     }
-    gl_FragColor = u_color;
+    gl_FragColor = mix(u_color_1, u_color_2, 1. - len);
 }
 #endif

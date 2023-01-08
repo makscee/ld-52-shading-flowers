@@ -1,0 +1,11 @@
+{
+    "path": "shaders/system/flower_particles.glsl",
+    "parameters": {
+        "u_color_1": "#ffa201",
+        "u_color_2": "#128190",
+        "u_size": 0.02
+    },
+    "vertices": 1,
+    "instances": 5000,
+    "fov": 15.0
+}

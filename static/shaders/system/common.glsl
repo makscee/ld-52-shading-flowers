@@ -1,6 +1,8 @@
-uniform vec4 u_color;
+uniform vec4 u_color_1;
+uniform vec4 u_color_2;
 uniform float u_hue_shift;
 uniform float u_time;
+uniform float u_spawn = 0;
 
 vec3 hueShift(vec3 color, float hueAdjust) // hue in radians
 {
@@ -42,4 +44,23 @@ float vecAngle(vec2 v) {
 vec2 rotateCW(vec2 p, float a) {
     mat2 m = mat2(cos(a), -sin(a), sin(a), cos(a));
     return p * m;
+}
+
+vec2 N22(vec2 p) {
+    vec3 a = fract(p.xyx * vec3(123.34, 234.34, 345.65));
+    a += dot(a, a + 34.45);
+    return fract(vec2(a.x * a.y, a.y * a.z));
+}
+
+float rand(int i) {
+    return N22(vec2(i * .001)).x;
+}
+
+vec2 randVec(int i) {
+    return N22(vec2(i * .001));
+}
+
+vec2 randCircle(int i) {
+    float r2p = rand(i) * PI * 2.;
+    return vec2(cos(r2p), sin(r2p));
 }

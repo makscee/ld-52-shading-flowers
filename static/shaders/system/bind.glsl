@@ -7,7 +7,7 @@ uniform float u_padding = 0.0;
 uniform float u_toughness;
 uniform vec2 u_position;
 uniform vec2 u_position_2;
-const float THICKNESS = 0.1;
+const float THICKNESS = 0.05;
 
 out vec2 v_quad_pos;
 attribute vec2 a_pos;
@@ -28,6 +28,7 @@ void main() {
 in vec2 v_quad_pos;
 
 void main() {
-    gl_FragColor = u_color;
+    float len = length(v_quad_pos);
+    gl_FragColor = mix(u_color_1, u_color_2, len);
 }
 #endif

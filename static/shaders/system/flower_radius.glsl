@@ -29,7 +29,7 @@ void main() {
     if(len > 1.0) {
         discard;
     }
-    vec4 color = vec4(hueShift(u_color.rgb, u_hue_shift), 1.0);
+    vec4 color = u_color_2;
     if(len < 1.0 - THICKNESS / u_radius) {
         color.a = 0.1;
     } else {

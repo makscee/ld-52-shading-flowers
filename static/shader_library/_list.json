@@ -1,0 +1,4 @@
+[
+    "shaders/system/common.glsl",
+    "shaders/system/flower_particles.glsl"
+]

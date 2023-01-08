@@ -1,5 +1,3 @@
-use std::borrow::Borrow;
-
 use super::*;
 
 mod stats;
@@ -51,32 +49,37 @@ impl Flower {
 
     pub fn grow(&mut self, next_id: &Id, flowers: &mut Collection<Flower>) -> Flower {
         if let Some(head) = self.head {
-            let mut head = flowers.remove(&head).expect("Flower not found");
-            let new_head = head.grow(next_id, flowers);
-            flowers.insert(head);
-            new_head
-        } else {
-            let mut head = self.new_grown_head(next_id);
-            head.bind_by_id(&self.id, vec2(0.0, -3.0));
-            head.tail = Some(self.id);
-            let head = head;
-            debug!("new head#{}", head.id);
-            self.head = Some(head.id);
-            head
+            if flowers.get(&head).is_some() {
+                let mut head = flowers.remove(&head).expect("Flower not found");
+                let new_head = head.grow(next_id, flowers);
+                flowers.insert(head);
+                return new_head;
+            }
         }
+        let mut head = self.new_grown_head(next_id);
+        head.bind_by_id(
+            &self.id,
+            vec2(
+                -0.5 + head.stats.mutations[1],
+                -1.0 + -2.0 * head.stats.mutations[2],
+            ),
+        );
+        head.tail = Some(self.id);
+        let head = head;
+        debug!("new head#{}", head.id);
+        self.head = Some(head.id);
+        head
     }
 
-    pub fn get_all_nodes(&self, flowers: &Collection<Flower>) -> Vec<Id> {
+    pub fn get_head_nodes(&self, flowers: &Collection<Flower>) -> Vec<Id> {
         let mut nodes = vec![self.id];
         let mut node = self;
         while let Some(head) = node.head {
+            if flowers.get(&head).is_none() {
+                break;
+            }
             nodes.push(head);
             node = flowers.get(&head).expect("Flower not found");
-        }
-        node = self;
-        while let Some(tail) = node.tail {
-            nodes.push(tail);
-            node = flowers.get(&tail).expect("Flower not found");
         }
         nodes
     }
@@ -90,17 +93,15 @@ impl Flower {
     }
 
     pub fn pop(&mut self) {
-        self.stats.growth = 0.0;
         self.head = None;
-        if self.tail.is_none() {
-            return;
-        }
+        self.stats.growth = 0.0;
         debug!("Popped#{}", self.id);
         self.popped = true;
     }
 
     fn new_grown_head(&self, next_id: &Id) -> Flower {
         let mut new_head = self.clone();
+        new_head.binds.clear();
         new_head.id = *next_id;
         new_head.stats.radius *= 0.5;
         new_head.stats.size *= 0.5;
@@ -125,6 +126,9 @@ impl Flower {
         let mut node = self.head;
         self.do_update_binds(delta_time, model);
         while let Some(head) = &mut node {
+            if model.flowers.get(head).is_none() {
+                break;
+            }
             let mut head = model.flowers.remove(head).expect("Flower not found");
             head.do_update_binds(delta_time, model);
             node = head.head;
@@ -145,6 +149,7 @@ impl Flower {
     }
 
     pub fn add_ground_bind(&mut self, id: Id) -> Bind {
+        debug!("bind self#{} targ#{}", self.id, id);
         let bind = Bind {
             a: self.position,
             b: id,
@@ -193,6 +198,9 @@ impl Flower {
         }
         let mut node = self;
         while let Some(head) = &node.head {
+            if flowers.get(head).is_none() {
+                break;
+            }
             let head = flowers.get(head).expect("Flower not found");
             if head.seed {
                 return true;
@@ -208,6 +216,9 @@ impl Flower {
         }
         let mut node = self;
         while let Some(head) = &node.head {
+            if flowers.get(head).is_none() {
+                break;
+            }
             let head = flowers.get(head).expect("Flower not found");
             if head.stats.growth < 1.0 {
                 return false;
@@ -217,7 +228,7 @@ impl Flower {
         return true;
     }
 
-    pub fn update_growth(
+    pub fn update(
         &mut self,
         delta_time: f32,
         next_id: &mut Id,

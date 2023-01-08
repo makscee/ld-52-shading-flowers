@@ -11,6 +11,7 @@ pub struct SystemShaders {
     pub field: ShaderProgram,
     pub flower: ShaderProgram,
     pub flower_radius: ShaderProgram,
+    pub flower_particles: ShaderProgram,
     pub bind: ShaderProgram,
     pub seed: ShaderProgram,
 }

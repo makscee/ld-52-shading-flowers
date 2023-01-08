@@ -2,6 +2,7 @@ mod assets;
 mod game;
 mod logic;
 mod model;
+mod shader_edit;
 mod state;
 mod view;
 
@@ -12,6 +13,7 @@ use game::Game;
 use geng::{prelude::*, *};
 use logic::*;
 use model::*;
+use shader_edit::*;
 use state::*;
 use ugli::*;
 use view::*;
@@ -39,12 +41,20 @@ fn main() {
     logger::init().unwrap();
     geng::setup_panic_handler();
     let geng = setup_geng();
-
-    let mut logic = Logic::new();
     let assets = Rc::new(
         futures::executor::block_on(<Assets as geng::LoadAsset>::load(&geng, &static_path()))
             .unwrap(),
     );
+    // geng::run(
+    //     &geng,
+    //     ShaderEdit {
+    //         config_path: "shader_edit.json".to_string(),
+    //     }
+    //     .run(&geng),
+    // );
+    // return;
+
+    let mut logic = Logic::new();
 
     let view = View::new(geng.clone(), assets.clone());
 
