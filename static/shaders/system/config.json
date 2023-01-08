@@ -20,7 +20,13 @@
     "bind": {
         "path": "bind.glsl",
         "parameters": {},
-        "vertices": 4,
+        "vertices": 2,
+        "instances": 1
+    },
+    "seed": {
+        "path": "seed.glsl",
+        "parameters": {},
+        "vertices": 2,
         "instances": 1
     }
 }

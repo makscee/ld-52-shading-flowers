@@ -11,6 +11,7 @@ pub struct Flower {
     pub stats: FlowerStats,
     pub head: Option<Box<Flower>>,
     pub binds: HashMap<Id, Bind>,
+    seed: bool,
 }
 
 impl Flower {
@@ -22,6 +23,7 @@ impl Flower {
             stats,
             head: None,
             binds: default(),
+            seed: false,
         };
         flower
     }
@@ -32,6 +34,7 @@ impl Flower {
             stats,
             head: None,
             binds: default(),
+            seed: false,
         }
     }
     pub fn new_offspring(id: Id, position: Vec2<f32>, parents: Vec<FlowerStats>) -> Self {
@@ -54,8 +57,9 @@ impl Flower {
             head
         } else {
             let mut head = self.new_grown_head(next_id);
-            head.bind_by_id(&self.id, vec2(0.0, -2.0));
+            head.bind_by_id(&self.id, vec2(0.0, -3.0));
             let head = Box::new(head);
+            debug!("new head#{}", head.id);
             self.head = Some(head.clone());
             head
         }
@@ -64,8 +68,11 @@ impl Flower {
     fn new_grown_head(&self, next_id: &Id) -> Flower {
         let mut new_head = self.clone();
         new_head.id = *next_id;
-        new_head.stats.radius *= 0.7;
-        new_head.stats.size *= 0.7;
+        new_head.stats.radius *= 0.5;
+        new_head.stats.size *= 0.5;
+        new_head.seed = new_head.stats.size < 0.2;
+        new_head.stats.growth = 0.0;
+        new_head.stats.time_alive = 0.0;
         new_head
     }
 
@@ -149,5 +156,42 @@ impl Flower {
         if self.binds.contains_key(id) {
             self.binds.remove(id);
         }
+    }
+
+    fn is_seed(&self) -> bool {
+        if self.seed {
+            return true;
+        }
+        let mut node = self;
+        while let Some(head) = &node.head {
+            if head.seed {
+                return true;
+            }
+            node = &head;
+        }
+        return false;
+    }
+
+    fn is_grown(&self) -> bool {
+        if self.stats.growth < 1.0 {
+            return false;
+        }
+        let mut node = self;
+        while let Some(head) = &node.head {
+            if head.stats.growth < 1.0 {
+                return false;
+            }
+            node = &head;
+        }
+        return true;
+    }
+
+    pub fn update_growth(&mut self, delta_time: f32, next_id: &mut Id) -> Option<Box<Flower>> {
+        if !self.is_seed() && self.is_grown() {
+            let id = *next_id;
+            *next_id += 1;
+            return Some(self.grow(&id));
+        }
+        None
     }
 }

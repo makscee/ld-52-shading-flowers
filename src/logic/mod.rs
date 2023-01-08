@@ -29,6 +29,10 @@ impl Logic {
         for id in ids {
             let mut flower = self.model.flowers.get(&id).expect("Unit not found").clone();
             flower.update_binds(delta_time, &self.model);
+            let new_flower = flower.update_growth(delta_time, &mut self.next_id);
+            if let Some(new_flower) = new_flower {
+                self.model.flowers.insert(*new_flower);
+            }
             self.model.flowers.remove(&flower.id);
             self.model.flowers.insert(flower);
         }

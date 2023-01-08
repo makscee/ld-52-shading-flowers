@@ -1,5 +1,6 @@
 uniform vec4 u_color;
 uniform float u_hue_shift;
+uniform float u_time;
 
 vec3 hueShift(vec3 color, float hueAdjust) // hue in radians
 {

@@ -43,6 +43,12 @@ async fn load_system_shaders(
         .context(format!("Failed to load {path}"))?;
     system_shaders.flower_radius.program = Some(Rc::new(program));
 
+    let path = system_shaders.seed.path.clone();
+    let program = <ugli::Program as geng::LoadAsset>::load(&geng, &base_path.join(path.clone()))
+        .await
+        .context(format!("Failed to load {path}"))?;
+    system_shaders.seed.program = Some(Rc::new(program));
+
     let path = system_shaders.bind.path.clone();
     let program = <ugli::Program as geng::LoadAsset>::load(&geng, &base_path.join(path.clone()))
         .await

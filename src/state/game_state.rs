@@ -35,10 +35,13 @@ impl State for Game {
                     if button == MouseButton::Left {
                         flower.start_drag();
                     } else {
-                        let node = flower.grow(&next_id);
-                        debug!("new id#{}", node.id);
-                        self.logic.model.flowers.insert(*node);
+                        // let node = flower.grow(&next_id);
+                        // debug!("new id#{}", node.id);
+                        // self.logic.model.flowers.insert(*node);
                     }
+                    return;
+                }
+                if !self.logic.model.seed {
                     return;
                 }
                 let intersections = self
@@ -63,6 +66,7 @@ impl State for Game {
                     self.logic.model.fixed_pos.insert(bind.b, bind.a);
                     self.logic.model.flowers.insert(new_flower);
                 }
+                self.logic.model.seed = false;
             }
             Event::MouseUp {
                 position: _,

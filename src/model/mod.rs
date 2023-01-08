@@ -10,6 +10,7 @@ pub struct Model {
     pub harvest: i32,
     pub mouse_pos: Vec2<f32>,
     pub fixed_pos: HashMap<Id, Vec2<f32>>,
+    pub seed: bool,
 }
 
 impl Model {
@@ -21,6 +22,7 @@ impl Model {
             harvest: 0,
             mouse_pos: Vec2::ZERO,
             fixed_pos: default(),
+            seed: true,
         }
     }
 }

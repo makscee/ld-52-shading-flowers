@@ -32,6 +32,7 @@ impl View {
         self.draw_field(framebuffer, model);
         self.draw_flowers(framebuffer, model);
         self.draw_binds(framebuffer, model);
+        self.draw_seed(framebuffer, model);
     }
 
     fn draw_shader<U>(
@@ -132,5 +133,20 @@ impl View {
                 );
             }
         }
+    }
+
+    fn draw_seed(&self, framebuffer: &mut ugli::Framebuffer, model: &Model) {
+        if !model.seed {
+            return;
+        }
+        let uniforms = uniforms!(
+            u_time: model.game_time,
+        );
+        self.draw_shader(
+            framebuffer,
+            model.mouse_pos,
+            &self.assets.system_shaders.seed,
+            uniforms,
+        );
     }
 }
