@@ -1,3 +1,5 @@
+use std::borrow::Borrow;
+
 use super::*;
 
 mod stats;
@@ -9,9 +11,11 @@ pub struct Flower {
     pub id: Id,
     pub position: Vec2<f32>,
     pub stats: FlowerStats,
-    pub head: Option<Box<Flower>>,
+    pub head: Option<Id>,
+    pub tail: Option<Id>,
     pub binds: HashMap<Id, Bind>,
-    seed: bool,
+    pub popped: bool,
+    pub seed: bool,
 }
 
 impl Flower {
@@ -22,8 +26,10 @@ impl Flower {
             position,
             stats,
             head: None,
+            tail: None,
             binds: default(),
             seed: false,
+            popped: false,
         };
         flower
     }
@@ -33,36 +39,64 @@ impl Flower {
             position,
             stats,
             head: None,
+            tail: None,
             binds: default(),
             seed: false,
+            popped: false,
         }
     }
     pub fn new_offspring(id: Id, position: Vec2<f32>, parents: Vec<FlowerStats>) -> Self {
         Self::new_stats(id, position, FlowerStats::new_offspring(parents))
     }
 
-    pub fn get_all_nodes(&self) -> Vec<&Flower> {
-        let mut result = vec![self];
-        let mut head = &self.head;
-        while let Some(node) = head {
-            result.push(&node);
-            head = &node.head;
-        }
-        result
-    }
-
-    pub fn grow(&mut self, next_id: &Id) -> Box<Flower> {
-        if let Some(head) = &mut self.head {
-            let head = head.grow(next_id);
-            head
+    pub fn grow(&mut self, next_id: &Id, flowers: &mut Collection<Flower>) -> Flower {
+        if let Some(head) = self.head {
+            let mut head = flowers.remove(&head).expect("Flower not found");
+            let new_head = head.grow(next_id, flowers);
+            flowers.insert(head);
+            new_head
         } else {
             let mut head = self.new_grown_head(next_id);
             head.bind_by_id(&self.id, vec2(0.0, -3.0));
-            let head = Box::new(head);
+            head.tail = Some(self.id);
+            let head = head;
             debug!("new head#{}", head.id);
-            self.head = Some(head.clone());
+            self.head = Some(head.id);
             head
         }
+    }
+
+    pub fn get_all_nodes(&self, flowers: &Collection<Flower>) -> Vec<Id> {
+        let mut nodes = vec![self.id];
+        let mut node = self;
+        while let Some(head) = node.head {
+            nodes.push(head);
+            node = flowers.get(&head).expect("Flower not found");
+        }
+        node = self;
+        while let Some(tail) = node.tail {
+            nodes.push(tail);
+            node = flowers.get(&tail).expect("Flower not found");
+        }
+        nodes
+    }
+
+    pub fn get_root(&self, flowers: &Collection<Flower>) -> Id {
+        let mut node = self;
+        while let Some(tail) = node.tail {
+            node = flowers.get(&tail).expect("Tail not found");
+        }
+        node.id
+    }
+
+    pub fn pop(&mut self) {
+        self.stats.growth = 0.0;
+        self.head = None;
+        if self.tail.is_none() {
+            return;
+        }
+        debug!("Popped#{}", self.id);
+        self.popped = true;
     }
 
     fn new_grown_head(&self, next_id: &Id) -> Flower {
@@ -72,7 +106,6 @@ impl Flower {
         new_head.stats.size *= 0.5;
         new_head.seed = new_head.stats.size < 0.2;
         new_head.stats.growth = 0.0;
-        new_head.stats.time_alive = 0.0;
         new_head
     }
 
@@ -88,18 +121,14 @@ impl Flower {
         *harvest += 1;
     }
 
-    pub fn update_binds(&mut self, delta_time: f32, model: &Model) {
-        // let mut node = self;
-        // let mut head = &node.head;
-        // while let Some(node) = &mut head {
-        //     node.do_update_binds(delta_time, model);
-        //     head = &node.head;
-        // }
-        let mut node = self;
-        node.do_update_binds(delta_time, model);
-        while let Some(head) = &mut node.head {
+    pub fn update_binds(&mut self, delta_time: f32, model: &mut Model) {
+        let mut node = self.head;
+        self.do_update_binds(delta_time, model);
+        while let Some(head) = &mut node {
+            let mut head = model.flowers.remove(head).expect("Flower not found");
             head.do_update_binds(delta_time, model);
-            node = head;
+            node = head.head;
+            model.flowers.insert(head);
         }
     }
 
@@ -158,12 +187,13 @@ impl Flower {
         }
     }
 
-    fn is_seed(&self) -> bool {
+    pub fn is_seed(&self, flowers: &Collection<Flower>) -> bool {
         if self.seed {
             return true;
         }
         let mut node = self;
         while let Some(head) = &node.head {
+            let head = flowers.get(head).expect("Flower not found");
             if head.seed {
                 return true;
             }
@@ -172,12 +202,13 @@ impl Flower {
         return false;
     }
 
-    fn is_grown(&self) -> bool {
+    fn is_grown(&self, flowers: &Collection<Flower>) -> bool {
         if self.stats.growth < 1.0 {
             return false;
         }
         let mut node = self;
         while let Some(head) = &node.head {
+            let head = flowers.get(head).expect("Flower not found");
             if head.stats.growth < 1.0 {
                 return false;
             }
@@ -186,11 +217,16 @@ impl Flower {
         return true;
     }
 
-    pub fn update_growth(&mut self, delta_time: f32, next_id: &mut Id) -> Option<Box<Flower>> {
-        if !self.is_seed() && self.is_grown() {
+    pub fn update_growth(
+        &mut self,
+        delta_time: f32,
+        next_id: &mut Id,
+        flowers: &mut Collection<Flower>,
+    ) -> Option<Flower> {
+        if !self.is_seed(flowers) && self.is_grown(flowers) {
             let id = *next_id;
             *next_id += 1;
-            return Some(self.grow(&id));
+            return Some(self.grow(&id, flowers));
         }
         None
     }

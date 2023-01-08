@@ -14,6 +14,7 @@ impl State for Game {
         for flower in self.logic.model.flowers.iter_mut() {
             flower.stats.update(delta_time);
         }
+        self.logic.model.flowers.retain(|f| !f.popped);
     }
     fn fixed_update(&mut self, delta_time: f64) {}
 
@@ -24,20 +25,38 @@ impl State for Game {
                 button,
             } => {
                 let position = self.logic.model.mouse_pos;
+                let flowers = self.logic.model.flowers.clone();
                 let mut hovered_flower = None;
-                let next_id = self.logic.get_next_id();
-                for flower in self.logic.model.flowers.iter_mut() {
+                // let next_id = self.logic.get_next_id();
+                for flower in flowers.iter() {
                     if flower.is_mouse_over_size(position.map(|x| x as f32)) {
                         hovered_flower = Some(flower);
                     }
                 }
                 if let Some(flower) = hovered_flower {
                     if button == MouseButton::Left {
-                        flower.start_drag();
+                        self.logic
+                            .model
+                            .flowers
+                            .get_mut(&flower.id)
+                            .expect("Flower not found")
+                            .start_drag();
                     } else {
-                        // let node = flower.grow(&next_id);
-                        // debug!("new id#{}", node.id);
-                        // self.logic.model.flowers.insert(*node);
+                        let nodes = flower.get_all_nodes(&self.logic.model.flowers);
+                        debug!("nodes collected: {}", nodes.len());
+                        for id in nodes {
+                            let node = self
+                                .logic
+                                .model
+                                .flowers
+                                .get_mut(&id)
+                                .expect("Flower not found");
+                            debug!("try pop#{}", node.id());
+                            if node.seed {
+                                self.logic.model.seed = true;
+                            }
+                            node.pop();
+                        }
                     }
                     return;
                 }

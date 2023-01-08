@@ -19,11 +19,7 @@ impl Bind {
         if id == 0 {
             model.mouse_pos
         } else if id > 0 {
-            model
-                .flowers
-                .get(&id)
-                .expect(&format!("Flower#{} not found", id))
-                .position
+            model.flowers.get(&id).map_or(Vec2::ZERO, |f| f.position)
         } else {
             model.fixed_pos[&id]
         }
