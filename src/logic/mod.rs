@@ -17,15 +17,7 @@ impl Logic {
         Self { next_id, model }
     }
 
-    pub fn init(&mut self) {
-        self.init_flowers();
-    }
-
-    fn init_flowers(&mut self) {
-        let id = self.get_next_id();
-        let mut flower = Flower::new_random(id, Vec2::ZERO);
-        self.model.flowers.insert(flower);
-    }
+    pub fn init(&mut self) {}
 
     pub fn get_next_id(&mut self) -> Id {
         self.next_id += 1;

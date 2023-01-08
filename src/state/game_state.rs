@@ -57,10 +57,11 @@ impl State for Game {
                         intersections,
                     ));
                 } else {
-                    self.logic
-                        .model
-                        .flowers
-                        .insert(Flower::new_random(id, position));
+                    let mut new_flower = Flower::new_random(id, position);
+                    let id = -self.logic.get_next_id();
+                    let bind = new_flower.add_ground_bind(id);
+                    self.logic.model.fixed_pos.insert(bind.b, bind.a);
+                    self.logic.model.flowers.insert(new_flower);
                 }
             }
             Event::MouseUp {
@@ -68,8 +69,13 @@ impl State for Game {
                 button,
             } => {
                 if button == MouseButton::Left {
+                    let id = -self.logic.get_next_id();
                     for flower in self.logic.model.flowers.iter_mut() {
                         flower.end_drag();
+                        if !flower.has_ground_bind() {
+                            let bind = flower.add_ground_bind(id);
+                            self.logic.model.fixed_pos.insert(bind.b, bind.a);
+                        }
                     }
                 }
             }

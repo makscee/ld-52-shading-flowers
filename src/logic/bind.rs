@@ -12,7 +12,7 @@ pub struct Bind {
 impl Bind {
     pub fn is_broken(&self, model: &Model) -> bool {
         let distance = (self.a - Self::get_position_by_id(self.b, model)).len();
-        self.offset.len() > 0.0 && distance > self.offset.len() * self.toughness
+        self.toughness > 0.0 && distance > self.toughness
     }
 
     pub fn get_position_by_id(id: Id, model: &Model) -> Vec2<f32> {

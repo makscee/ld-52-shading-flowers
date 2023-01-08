@@ -16,13 +16,14 @@ pub struct Flower {
 impl Flower {
     pub fn new_random(id: Id, position: Vec2<f32>) -> Self {
         let stats = FlowerStats::new_random();
-        Self {
+        let flower = Self {
             id,
             position,
             stats,
             head: None,
             binds: default(),
-        }
+        };
+        flower
     }
     pub fn new_stats(id: Id, position: Vec2<f32>, stats: FlowerStats) -> Self {
         Self {
@@ -53,7 +54,7 @@ impl Flower {
             head
         } else {
             let mut head = self.new_grown_head(next_id);
-            head.add_bind(&self.id, vec2(0.0, -2.0));
+            head.bind_by_id(&self.id, vec2(0.0, -2.0));
             let head = Box::new(head);
             self.head = Some(head.clone());
             head
@@ -103,15 +104,31 @@ impl Flower {
         self.binds.retain(|_, v| !v.is_broken(model));
     }
 
+    pub fn has_ground_bind(&self) -> bool {
+        self.binds.iter().any(|b| b.1.b < 0)
+    }
+
+    pub fn add_ground_bind(&mut self, id: Id) -> Bind {
+        let bind = Bind {
+            a: self.position,
+            b: id,
+            offset: Vec2::ZERO,
+            tension: 10.0,
+            toughness: 2.0,
+        };
+        self.bind_by_bind(bind.clone());
+        bind
+    }
+
     pub fn start_drag(&mut self) {
-        self.add_bind(&0, Vec2::ZERO);
+        self.bind_by_id(&0, Vec2::ZERO);
     }
 
     pub fn end_drag(&mut self) {
-        self.remove_bind(&0);
+        self.remove_bind(&0)
     }
 
-    pub fn add_bind(&mut self, id: &Id, offset: Vec2<f32>) {
+    pub fn bind_by_id(&mut self, id: &Id, offset: Vec2<f32>) {
         self.binds.insert(
             *id,
             Bind {
@@ -122,6 +139,10 @@ impl Flower {
                 toughness: 10.0,
             },
         );
+    }
+
+    pub fn bind_by_bind(&mut self, bind: Bind) {
+        self.binds.insert(bind.b, bind);
     }
 
     pub fn remove_bind(&mut self, id: &Id) {
